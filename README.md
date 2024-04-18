@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
 ```
 ## OUTPUT:
-![image](https://github.com/jaisurya143/Ex-04/assets/121999338/9314f3bb-2d2d-4efa-96df-f0468cccdd00)
+![image](https://github.com/jaisurya143/Ex-04/assets/121999338/858c435b-f714-446e-86ba-e680dbce0295)
 
 
 
