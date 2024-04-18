@@ -96,7 +96,8 @@ if __name__ == "__main__":
 
 ```
 ## OUTPUT:
-![Uploading image.png…]()
+![image](https://github.com/jaisurya143/Ex-04/assets/121999338/9314f3bb-2d2d-4efa-96df-f0468cccdd00)
+
 
 
 
