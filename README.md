@@ -53,73 +53,50 @@ H0, H1, H2, H3, H4, H5: Word buffers with final message digest
 ```
 ## PROGRAM
 ```python
-def sha1(message):
-    # Step 1: Append Padding Bits
-    original_message = message
-    message += b'\x80'  # Append a single '1' bit
-    while (len(message) * 8) % 512 != 448:
-        message += b'\x00'  # Append '0' bits until length % 512 == 448
+import hashlib
 
-    # Step 2: Append Length
-    message += (len(original_message) * 8).to_bytes(8, byteorder='big')
+def main():
+    try:
+        md = hashlib.sha1()
+        print("Message digest object info: ")
+        print(" Algorithm = " + md.name)
+        print(" ToString = " + str(md))
+        
+        input_str = "".encode('utf-8')
+        md.update(input_str)
+        output = md.digest()
+        print()
+        print("SHA1(\"" + input_str.decode('utf-8') + "\") = " + bytes_to_hex(output))
+        
+        input_str = "jai".encode('utf-8')
+        md.update(input_str)
+        output = md.digest()
+        print()
+        print("SHA1(\"" + input_str.decode('utf-8') + "\") = " + bytes_to_hex(output))
+        
+        input_str = "jai surya".encode('utf-8')
+        md.update(input_str)
+        output = md.digest()
+        print()
+        print("SHA1(\"" + input_str.decode('utf-8') + "\") = " + bytes_to_hex(output))
+        print("")
+    except Exception as e:
+        print("Exception: " + str(e))
 
-    # Step 5: Initialize Buffers
-    h0 = 0x67452301
-    h1 = 0xEFCDAB89
-    h2 = 0x98BADCFE
-    h3 = 0x10325476
-    h4 = 0xC3D2E1F0
+def bytes_to_hex(b):
+    hex_digits = '0123456789ABCDEF'
+    buf = ""
+    for byte in b:
+        buf += hex_digits[(byte >> 4) & 0x0F]
+        buf += hex_digits[byte & 0x0F]
+    return buf
 
-    # Step 6: Processing Message in 512-bit blocks
-    for i in range(0, len(message), 64):
-        chunk = message[i:i+64]
-        words = [int.from_bytes(chunk[j:j+4], byteorder='big') for j in range(0, 64, 4)]
-
-        # Step 6: Pseudo Code
-        for t in range(16, 80):
-            words.append((words[t-3] ^ words[t-8] ^ words[t-14] ^ words[t-16]) << 1)
-
-        a, b, c, d, e = h0, h1, h2, h3, h4
-
-        for t in range(80):
-            if t < 20:
-                f = (b & c) | ((~b) & d)
-                k = 0x5A827999
-            elif t < 40:
-                f = b ^ c ^ d
-                k = 0x6ED9EBA1
-            elif t < 60:
-                f = (b & c) | (b & d) | (c & d)
-                k = 0x8F1BBCDC
-            else:
-                f = b ^ c ^ d
-                k = 0xCA62C1D6
-
-            temp = (a << 5) + f + e + words[t] + k & 0xFFFFFFFF
-            e = d
-            d = c
-            c = b << 30
-            b = a
-            a = temp
-
-        # Update buffers
-        h0 = (h0 + a) & 0xFFFFFFFF
-        h1 = (h1 + b) & 0xFFFFFFFF
-        h2 = (h2 + c) & 0xFFFFFFFF
-        h3 = (h3 + d) & 0xFFFFFFFF
-        h4 = (h4 + e) & 0xFFFFFFFF
-
-    # Output the final message digest
-    return '%08x%08x%08x%08x%08x' % (h0, h1, h2, h3, h4)
-
-# Example usage:
-message = b"Hello, World!"
-hashed_message = sha1(message)
-print("SHA-1 hash of '{}' is: {}".format(message, hashed_message))
+if __name__ == "__main__":
+    main()
 
 ```
 ## OUTPUT:
-![image](https://github.com/sanjay3061/Ex-04/assets/121215929/beae4709-506d-4b58-94dd-8568d4a36bf4)
+![Uploading image.png…]()
 
 
 
