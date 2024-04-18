@@ -237,6 +237,7 @@ if __name__ == "__main__":
 
 ```
 ## OUTPUT:
+![image](https://github.com/jaisurya143/Ex-04/assets/121999338/7e738cab-d296-40ce-a91b-fea22a4cc35c)
 
 ## RESULT:
 Thus program to implement the signature scheme named digital signature standard (Euclidean Algorithm) is implementeds successfully.
