@@ -52,58 +52,77 @@ Output:
 H0, H1, H2, H3, H4, H5: Word buffers with final message digest
 ```
 ## PROGRAM
-```
-import java.security.*;
-public class SHA1 {
-public static void main(String[] a) {
-try {
-MessageDigest md = MessageDigest.getInstance("SHA1");
-System.out.println("Message digest object info: ");
-System.out.println(" Algorithm = " +md.getAlgorithm());
-System.out.println(" Provider = " +md.getProvider());
-System.out.println(" ToString = " +md.toString());
-String input = "";
-md.update(input.getBytes());
-byte[] output = md.digest();
-System.out.println();
-System.out.println("SHA1(\""+input+"\") = " +bytesToHex(output));
-input = "abc";
-md.update(input.getBytes());
-output = md.digest();
-System.out.println();
-System.out.println("SHA1(\""+input+"\") = " +bytesToHex(output));
-input = "abcdefghijklmnopqrstuvwxyz";
-md.update(input.getBytes());
-output = md.digest();
-System.out.println();
-System.out.println("SHA1(\"" +input+"\") = " +bytesToHex(output));
-System.out.println(""); }
-catch (Exception e) {
-System.out.println("Exception: " +e);
-}
-}
-public static String bytesToHex(byte[] b) {
-char hexDigit[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-StringBuffer buf = new StringBuffer();
-for (int j=0; j<b.length; j++) {
-buf.append(hexDigit[(b[j] >> 4) & 0x0f]);
-buf.append(hexDigit[b[j] & 0x0f]); }
-return buf.toString(); }
-}
+```python
+def sha1(message):
+    # Step 1: Append Padding Bits
+    original_message = message
+    message += b'\x80'  # Append a single '1' bit
+    while (len(message) * 8) % 512 != 448:
+        message += b'\x00'  # Append '0' bits until length % 512 == 448
+
+    # Step 2: Append Length
+    message += (len(original_message) * 8).to_bytes(8, byteorder='big')
+
+    # Step 5: Initialize Buffers
+    h0 = 0x67452301
+    h1 = 0xEFCDAB89
+    h2 = 0x98BADCFE
+    h3 = 0x10325476
+    h4 = 0xC3D2E1F0
+
+    # Step 6: Processing Message in 512-bit blocks
+    for i in range(0, len(message), 64):
+        chunk = message[i:i+64]
+        words = [int.from_bytes(chunk[j:j+4], byteorder='big') for j in range(0, 64, 4)]
+
+        # Step 6: Pseudo Code
+        for t in range(16, 80):
+            words.append((words[t-3] ^ words[t-8] ^ words[t-14] ^ words[t-16]) << 1)
+
+        a, b, c, d, e = h0, h1, h2, h3, h4
+
+        for t in range(80):
+            if t < 20:
+                f = (b & c) | ((~b) & d)
+                k = 0x5A827999
+            elif t < 40:
+                f = b ^ c ^ d
+                k = 0x6ED9EBA1
+            elif t < 60:
+                f = (b & c) | (b & d) | (c & d)
+                k = 0x8F1BBCDC
+            else:
+                f = b ^ c ^ d
+                k = 0xCA62C1D6
+
+            temp = (a << 5) + f + e + words[t] + k & 0xFFFFFFFF
+            e = d
+            d = c
+            c = b << 30
+            b = a
+            a = temp
+
+        # Update buffers
+        h0 = (h0 + a) & 0xFFFFFFFF
+        h1 = (h1 + b) & 0xFFFFFFFF
+        h2 = (h2 + c) & 0xFFFFFFFF
+        h3 = (h3 + d) & 0xFFFFFFFF
+        h4 = (h4 + e) & 0xFFFFFFFF
+
+    # Output the final message digest
+    return '%08x%08x%08x%08x%08x' % (h0, h1, h2, h3, h4)
+
+# Example usage:
+message = b"Hello, World!"
+hashed_message = sha1(message)
+print("SHA-1 hash of '{}' is: {}".format(message, hashed_message))
+
 ```
 ## OUTPUT:
-```
-C:\Program Files\Java\jdk1.6.0_20\bin>javac SHA1.java
-C:\Program Files\Java\jdk1.6.0_20\bin>java SHA1
-Message digest object info:
-Algorithm = SHA1
-Provider = SUN version 1.6
-ToString = SHA1 Message Digest from SUN, <initialized>
-SHA1("") = DA39A3EE5E6B4B0D3255BFEF95601890AFD80709
-SHA1("abc") = A9993E364706816ABA3E25717850C26C9CD0D89D
-SHA1("abcdefghijklmnopqrstuvwxyz") =
-32D10C7B8CF96570CA04CE37F2A19D84240D3A89
-```
+![image](https://github.com/sanjay3061/Ex-04/assets/121215929/beae4709-506d-4b58-94dd-8568d4a36bf4)
+
+
+
 ## RESULT:
 Thus SHA was implemented successfully.
 
@@ -115,7 +134,7 @@ Thus SHA was implemented successfully.
   ## DIGITAL SIGNATURE STANDARD
 
 ## AIM:
-To write a C program to implement the signature scheme named digital
+To write a python program to implement the signature scheme named digital
 signature standard (Euclidean Algorithm).
 ## ALGORITHM:
 ```
@@ -129,102 +148,61 @@ STEP-6: Comparing this ‘y’ with actual y’s document, Alice concludes that 
 forgery.
 ```
 ## PROGRAM: (Digital Signature Standard)
-```
-import java.util.*;
-import java.math.BigInteger;
-class dsaAlg {
-final static BigInteger one = new BigInteger("1");
-final static BigInteger zero = new BigInteger("0");
-public static BigInteger getNextPrime(String ans)
-{
-BigInteger test = new BigInteger(ans);
-while (!test.isProbablePrime(99))
-e:
-{
-test = test.add(one);
-}
-return test;
-}
-public static BigInteger findQ(BigInteger n)
-{
-BigInteger start = new BigInteger("2");
-while (!n.isProbablePrime(99))
-{
-while (!((n.mod(start)).equals(zero)))
-{
-start = start.add(one);
-}
-n = n.divide(start);
-}
-return n;
-}
-public static BigInteger getGen(BigInteger p, BigInteger q,
-Random r)
-{
-BigInteger h = new BigInteger(p.bitLength(), r);
-h = h.mod(p);
-return h.modPow((p.subtract(one)).divide(q), p);
-}
-public static void main (String[] args) throws
-java.lang.Exception
-{
-Random randObj = new Random();
-BigInteger p = getNextPrime("10600"); /* approximate
-prime */
-BigInteger q = findQ(p.subtract(one));
-BigInteger g = getGen(p,q,randObj);
-System.out.println(" \n simulation of Digital Signature
-Algorithm \n");
-System.out.println(" \n global public key components
-are:\n");
-System.out.println("\np is: " + p);
-System.out.println("\nq is: " + q);
-System.out.println("\ng is: " + g);
-BigInteger x = new BigInteger(q.bitLength(), randObj);
-x = x.mod(q);
-BigInteger y = g.modPow(x,p);
-BigInteger k = new BigInteger(q.bitLength(), randObj);
-k = k.mod(q);
-BigInteger r = (g.modPow(k,p)).mod(q);
-BigInteger hashVal = new BigInteger(p.bitLength(),
-randObj);
-BigInteger kInv = k.modInverse(q);
-BigInteger s = kInv.multiply(hashVal.add(x.multiply(r)));
-s = s.mod(q);
-System.out.println("\nsecret information are:\n");
-System.out.println("x (private) is:" + x);
-System.out.println("k (secret) is: " + k);
-System.out.println("y (public) is: " + y);
-System.out.println("h (rndhash) is: " + hashVal);
-System.out.println("\n generating digital signature:\n");
-System.out.println("r is : " + r);
-System.out.println("s is : " + s);
-BigInteger w = s.modInverse(q);
-BigInteger u1 = (hashVal.multiply(w)).mod(q);
-BigInteger u2 = (r.multiply(w)).mod(q);
-BigInteger v = (g.modPow(u1,p)).multiply(y.modPow(u2,p));
-v = (v.mod(p)).mod(q);
-System.out.println("\nverifying digital signature
-(checkpoints)\n:");
-System.out.println("w is : " + w);
-System.out.println("u1 is : " + u1);
-System.out.println("u2 is : " + u2);
-System.out.println("v is : " + v);
-if (v.equals(r))
-{
-System.out.println("\nsuccess: digital signature is
-verified!\n " + r);
-}
-else
-{
-System.out.println("\n error: incorrect digital
-signature\n ");
-}
-}
-}
+```python
+# Function to check if two numbers are coprime
+def are_coprime(a, b):
+    while b != 0:
+        a, b = b, a % b
+    return a == 1
+
+# Function to calculate modular inverse using extended Euclidean algorithm
+def mod_inverse(a, m):
+    m0, x0, x1 = m, 0, 1
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    return x1 if x1 >= 0 else x1 + m0
+
+# Function to verify the signature
+def verify_signature(p, alpha, beta, x, y):
+    # Check if alpha and beta are coprime to p-1
+    if not are_coprime(alpha, p - 1) or not are_coprime(beta, p - 1):
+        print("Error: Alpha and beta must be coprime to p-1.")
+        return False
+    
+    # Calculate modular inverse of beta
+    beta_inverse = mod_inverse(beta, p - 1)
+    
+    # Calculate (alpha^x * beta_inverse^y) mod p
+    lhs = pow(alpha, x, p)
+    rhs = pow(beta_inverse, y, p)
+    result = (lhs * rhs) % p
+    
+    # If result matches alpha, signature is verified
+    return result == alpha
+
+def main():
+    # Given values
+    p = 23  # Prime number
+    alpha = 5  # Random coprime
+    beta = 7  # Random coprime
+    x = 4  # x's original signature
+    y = 9  # Signature to be verified
+
+    # Verify the signature
+    is_valid = verify_signature(p, alpha, beta, x, y)
+    if is_valid:
+        print("Signature is verified.")
+    else:
+        print("Signature is not verified.")
+
+if __name__ == "__main__":
+    main()
+
 ```
 ## OUTPUT:
-![image](https://github.com/IsaacAIML2023/Ex-04/assets/158465339/337034c5-ea1c-4332-a753-7c5b679325f2)
+![image](https://github.com/sanjay3061/Ex-04/assets/121215929/2a295bff-0f58-452d-a0af-8c56460dcf2a)
 
 ## RESULT:
 Thus program to implement the signature scheme named digital signature standard (Euclidean Algorithm) is implementeds successfully.
